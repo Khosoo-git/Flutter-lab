@@ -6,6 +6,27 @@ class CalculatorScreen extends StatefulWidget {
   _CalculatorScreenState createState() => _CalculatorScreenState();
 }
 
+List<String> buttons = [
+  '7',
+  '8',
+  '9',
+  '÷',
+  '4',
+  '5',
+  '6',
+  '×',
+  '1',
+  '2',
+  '3',
+  '-',
+  '.',
+  '0',
+  '00',
+  '+',
+  'CLEAR',
+  '=',
+];
+
 class _CalculatorScreenState extends State<CalculatorScreen> {
   String input = '';
   String result = '0';
@@ -27,6 +48,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           }
         }
       } else {
+        if (value == '.') {
+          if (input.isNotEmpty && input[input.length - 1] == '.') {
+            return;
+          }
+          int lastOperatorIndex = input.lastIndexOf(RegExp(r'[+\-×÷]'));
+          String lastNumber =
+              (lastOperatorIndex != -1)
+                  ? input.substring(lastOperatorIndex + 1)
+                  : input;
+          if (lastNumber.contains('.')) {
+            return;
+          }
+        }
+
+        if (value == '0') {
+          if (input == '0') {
+            return;
+          }
+          int lastOperatorIndex = input.lastIndexOf(RegExp(r'[+\-×÷]'));
+          if (lastOperatorIndex == input.length - 1) {
+            input += '0'; // зөв
+            return;
+          }
+        }
+
         input += value;
       }
     });
@@ -92,54 +138,39 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildButtonGrid() {
-    return GridView.builder(
+    return Padding(
       padding: EdgeInsets.all(8),
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 5,
-        mainAxisSpacing: 5,
-        childAspectRatio: 2.8,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children:
+            buttons.map((button) {
+              double widthFactor = (button == 'CLEAR' || button == '=') ? 2 : 1;
+
+              return SizedBox(
+                width:
+                    (MediaQuery.of(context).size.width - 48) / 4 * widthFactor,
+                height: 60,
+                child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                  child: InkWell(
+                    onTap: () => _onButtonPressed(button),
+                    borderRadius: BorderRadius.circular(4),
+                    splashColor: Colors.grey.withOpacity(0.3),
+                    highlightColor: Colors.grey.withOpacity(0.2),
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        button,
+                        style: TextStyle(fontSize: 22, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
       ),
-      itemCount: buttons.length,
-      itemBuilder: (context, index) {
-        return ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: EdgeInsets.all(16),
-            backgroundColor:
-                buttons[index] == '=' ? Colors.white : Colors.white,
-            foregroundColor:
-                buttons[index] == '=' ? Colors.black : Colors.black,
-          ),
-          onPressed: () => _onButtonPressed(buttons[index]),
-          child: Text(buttons[index], style: TextStyle(fontSize: 22)),
-        );
-      },
     );
   }
 }
-
-List<String> buttons = [
-  '7',
-  '8',
-  '9',
-  '÷',
-  '4',
-  '5',
-  '6',
-  '×',
-  '1',
-  '2',
-  '3',
-  '-',
-  '.',
-  '0',
-  '00',
-  '+',
-  'CLEAR',
-  '=',
-];
